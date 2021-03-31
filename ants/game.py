@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 from .ant import Ant
-from .config import N_ANTS, N_FOOD
+from .config import N_ANTS, N_FOOD_SPOTS, N_FOOD_PER_SPOT
 from .functions import get_random_pos, pos_close_to
 
 
@@ -22,17 +22,20 @@ class Game:
         self.game_loop()
     
     def setup(self):
-        self.home: tuple = (self.screen_width // 2, self.screen_height // 2)
-        self.ants: list[Ant] = [Ant(self.home) for _ in range(N_ANTS)]
+        self.home: list = [self.screen_width // 2, self.screen_height // 2]
+        self.ants: list[Ant] = [Ant(self.home.copy()) for _ in range(N_ANTS)]
 
-        food_blob_pos = get_random_pos((self.screen_width, self.screen_height))
-        self.food: list[tuple] = [pos_close_to(food_blob_pos) for _ in range(N_FOOD)]
+        self.food: list[tuple] = []
+        for _ in range(N_FOOD_SPOTS):
+            food_blob_pos = get_random_pos((self.screen_width, self.screen_height))
+            for _ in range(N_FOOD_PER_SPOT):
+                self.food.append(pos_close_to(food_blob_pos))
 
     def game_loop(self):
         while self.run:
             self.screen.fill((0, 0, 0))
 
-            self.update(1000 / fps)
+            self.update(1000 / fps / 1000)
             self.draw()
             
             for event in pygame.event.get():
@@ -44,10 +47,14 @@ class Game:
 
 
     def update(self, delta_time):
-        pass
+        for ant in self.ants:
+            ant.update(delta_time)
 
     def draw(self):
         """ Draw all the simulation items on screen """
+
+        # draw home
+        pygame.draw.circle(self.screen, (0, 0, 255), self.home, 10)
 
         # draw ants
         for ant in self.ants:
