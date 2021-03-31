@@ -1,0 +1,2 @@
+N_ANTS = 10
+N_FOOD = 30
